@@ -1,10 +1,19 @@
 # 🌐 Python Port Scanner
 
+
+## Get this repository
+
+Clone the current project (this repository's canonical GitHub URL), then follow the installation and usage steps below.
+
+```bash
+git clone https://github.com/cyberworlduniversity/port_scanner.git
+cd port_scanner
+```
+
 > **Definition:** A Port Scanner is a network reconnaissance tool that probes a target IP address or hostname to discover which TCP ports are **open** and what **services** may be running behind them. It is a foundational tool in network security, system administration, and ethical hacking.
 
 ---
-
-## 📚 Table of Contents
+\n## 📚 Table of Contents
 
 1. [What is a Port Scanner?](#-what-is-a-port-scanner)
 2. [Key Definitions](#-key-definitions)
@@ -170,7 +179,7 @@ A dictionary maps well-known port numbers to their standard service names.
 ### Installation
 ```bash
 # No pip install needed! Clone and run:
-git clone <your-repo>
+git clone https://github.com/cyberworlduniversity/port_scanner.git
 cd port_scanner
 python port_scanner.py
 ```
