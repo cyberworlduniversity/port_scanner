@@ -25,6 +25,7 @@ Usage:
 
 import socket
 import argparse
+import ipaddress
 import threading
 import sys
 import time
@@ -85,6 +86,32 @@ def banner():
     print("═" * 60)
     print(f"  Started : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("═" * 60 + "\n")
+
+
+def validate_scan_target(ip: str, allow_public: bool = False) -> str:
+    """Validate a resolved IPv4 target before any network connection is made."""
+    try:
+        address = ipaddress.ip_address(ip)
+    except ValueError as exc:
+        raise ValueError("Target must resolve to a valid IPv4 address.") from exc
+    if not isinstance(address, ipaddress.IPv4Address):
+        raise ValueError("Only IPv4 targets are supported.")
+    if not address.is_global and not address.is_private:
+        raise ValueError("Target is a special-use address and cannot be scanned.")
+    if address.is_global and not allow_public:
+        raise ValueError("Public targets require the explicit --allow-public flag and authorization.")
+    return str(address)
+
+
+def validate_scan_options(start: int, end: int, threads: int, timeout: float) -> None:
+    if not (1 <= start <= end <= 65535):
+        raise ValueError("Port range must satisfy 1 <= start <= end <= 65535.")
+    if end - start + 1 > 1024:
+        raise ValueError("A single scan is limited to 1024 ports.")
+    if not (1 <= threads <= 100):
+        raise ValueError("Thread count must be between 1 and 100.")
+    if not (0.1 <= timeout <= 5.0):
+        raise ValueError("Timeout must be between 0.1 and 5.0 seconds.")
 
 
 def resolve_target(target: str) -> str:
@@ -157,13 +184,7 @@ def scan_port(ip: str, port: int, timeout: float = 1.0) -> dict:
         if code == 0:
             result["open"] = True
 
-            # Step 3: Try to grab service banner
-            try:
-                sock.send(b"HEAD / HTTP/1.0\r\n\r\n")
-                banner_data = sock.recv(128).decode(errors="ignore").strip()
-                result["banner"] = banner_data.split("\n")[0][:60] if banner_data else ""
-            except Exception:
-                pass  # Banner grab is optional
+            # No application payload is sent. This is a TCP-connect-only scan.
 
         sock.close()
 
@@ -296,7 +317,9 @@ def parse_args():
     parser.add_argument("--threads", "-n", type=int, default=200,
                         help="Number of threads (default: 200)")
     parser.add_argument("--timeout", "-o", type=float, default=0.5,
-                        help="Timeout per port in seconds (default: 0.5)")
+                        help="Timeout per port in seconds (0.1–5.0, default: 0.5)")
+    parser.add_argument("--allow-public", action="store_true",
+                        help="Explicitly allow scanning a public IPv4 target you are authorized to assess.")
     return parser.parse_args()
 
 
@@ -327,16 +350,20 @@ def main():
             print("  [✘] No target specified. Exiting.")
             sys.exit(1)
 
-    # Step 2: Validate port range
-    if not (1 <= args.start <= 65535) or not (1 <= args.end <= 65535):
-        print("  [✘] Port range must be between 1 and 65535.")
-        sys.exit(1)
-    if args.start > args.end:
-        print("  [✘] Start port must be <= end port.")
-        sys.exit(1)
+    # Step 2: Validate resource limits before network activity
+    try:
+        validate_scan_options(args.start, args.end, args.threads, args.timeout)
+    except ValueError as exc:
+        print(f"  [✘] {exc}")
+        sys.exit(2)
 
-    # Step 3: Resolve target
+    # Step 3: Resolve once and enforce target policy before scanning
     ip = resolve_target(target)
+    try:
+        ip = validate_scan_target(ip, allow_public=args.allow_public)
+    except ValueError as exc:
+        print(f"  [✘] {exc}")
+        sys.exit(2)
     print()
 
     # Step 4: Scan
