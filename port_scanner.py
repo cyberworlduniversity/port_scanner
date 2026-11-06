@@ -96,10 +96,13 @@ def validate_scan_target(ip: str, allow_public: bool = False) -> str:
         raise ValueError("Target must resolve to a valid IPv4 address.") from exc
     if not isinstance(address, ipaddress.IPv4Address):
         raise ValueError("Only IPv4 targets are supported.")
-    if not address.is_global and not address.is_private:
-        raise ValueError("Target is a special-use address and cannot be scanned.")
+    if (address.is_loopback or address.is_link_local or address.is_multicast or
+            address.is_reserved or address.is_unspecified):
+        raise ValueError("Loopback, link-local, multicast, reserved, and unspecified targets are blocked.")
     if address.is_global and not allow_public:
         raise ValueError("Public targets require the explicit --allow-public flag and authorization.")
+    if not address.is_global and not address.is_private:
+        raise ValueError("Only private or explicitly authorized public IPv4 targets are supported.")
     return str(address)
 
 
