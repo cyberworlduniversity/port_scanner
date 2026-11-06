@@ -332,3 +332,48 @@ port_scanner/
 ---
 
 *Built with Python standard library only. No external dependencies.*
+
+
+## Repository Quick Start
+
+Clone this repository and enter its directory:
+
+```bash
+git clone https://github.com/cyberworlduniversity/port_scanner.git
+cd port_scanner
+```
+
+### Requirements and installation
+
+- Python 3.10+ is recommended.
+- No third-party packages are required by the documented project entry point.
+
+### Run
+
+```bash
+python port_scanner.py
+```
+
+If the program presents command-line options, run `python port_scanner.py --help` to view the options supported by the current version. Use a test target or sample input first.
+
+### Validate the source
+
+```bash
+python -m compileall -q .
+```
+
+Scan only hosts and ports you are authorized to assess.
+
+### Program flow
+
+```mermaid
+flowchart TD
+    A[Start] --> B[Load configuration and input]
+    B --> C{Input valid?}
+    C -- No --> D[Show usage or validation error]
+    C -- Yes --> E[Run port scanner analysis]
+    E --> F[Collect findings]
+    F --> G[Display or save results]
+    G --> H[Exit]
+    D --> H
+```
