@@ -303,7 +303,7 @@ def print_summary(open_ports: list, elapsed: float, target: str):
     print("═" * 60 + "\n")
 
 
-def parse_args():
+def parse_args(argv=None):
     """
     DEFINITION: Argument Parser
     Handles command-line arguments using Python's argparse module.
@@ -319,13 +319,13 @@ def parse_args():
                         help="Start port (default: 1)")
     parser.add_argument("--end",     "-e", type=int, default=1024,
                         help="End port (default: 1024)")
-    parser.add_argument("--threads", "-n", type=int, default=200,
+    parser.add_argument("--threads", "-n", type=int, default=100,
                         help="Number of threads (default: 200)")
     parser.add_argument("--timeout", "-o", type=float, default=0.5,
                         help="Timeout per port in seconds (0.1–5.0, default: 0.5)")
     parser.add_argument("--allow-public", action="store_true",
                         help="Explicitly allow scanning a public IPv4 target you are authorized to assess.")
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 # ─────────────────────────────────────────────
