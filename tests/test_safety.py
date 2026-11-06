@@ -1,5 +1,5 @@
 import unittest
-from port_scanner import validate_scan_options, validate_scan_target
+from port_scanner import parse_args, validate_scan_options, validate_scan_target
 
 
 class PortScannerSafetyTests(unittest.TestCase):
@@ -15,6 +15,11 @@ class PortScannerSafetyTests(unittest.TestCase):
         for target in ("127.0.0.1", "169.254.169.254", "224.0.0.1", "not-an-ip", "::1"):
             with self.subTest(target=target), self.assertRaises(ValueError):
                 validate_scan_target(target, allow_public=True)
+
+    def test_default_thread_count_respects_safety_limit(self):
+        args = parse_args([])
+        self.assertEqual(args.threads, 100)
+        validate_scan_options(args.start, args.end, args.threads, args.timeout)
 
     def test_scan_resource_limits(self):
         validate_scan_options(1, 1024, 100, 0.5)
