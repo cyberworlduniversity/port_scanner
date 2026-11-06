@@ -13,7 +13,8 @@ cd port_scanner
 > **Definition:** A Port Scanner is a network reconnaissance tool that probes a target IP address or hostname to discover which TCP ports are **open** and what **services** may be running behind them. It is a foundational tool in network security, system administration, and ethical hacking.
 
 ---
-\n## 📚 Table of Contents
+
+## 📚 Table of Contents
 
 1. [What is a Port Scanner?](#-what-is-a-port-scanner)
 2. [Key Definitions](#-key-definitions)
